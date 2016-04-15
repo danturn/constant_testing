@@ -1,5 +1,5 @@
 # Constant Testing
-## Monitors for file changes in elixir projects and runs tests when required
+## Monitor elixir projects and runs tests when files are edited
 
 ### Usage
 1. Setup for your Elixir project:
