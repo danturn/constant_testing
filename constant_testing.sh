@@ -49,7 +49,15 @@ function file_changed {
     log_failure "Uh-oh, You don't have tests for this do you?"
   fi
 }
+ 
+function install_tools {
+  if [ $(dpkg-query -W -f='${Status}' inotify-tools 2>/dev/null | grep -c "ok installed") -eq 0 ];
+  then
+    sudo apt-get install inotify-tools
+  fi
+}
 
+install_tools
 log_info "I'm going to watch you work... in a creepy way"
 if [[ $1 == "--debug" ]]; then debug=1; fi 
 
