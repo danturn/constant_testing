@@ -1,12 +1,16 @@
 # Constant Testing
-## Monitors for file changes in elixir projects and runs tests when required
+## Monitors elixir projects and runs tests when files are edited
 
 ### Usage
 1. Setup for your Elixir project:
-  * ./setup_in.sh ~/src/my_lovely_project
+  ```shell
+ ./setup_in.sh ~/src/my_lovely_project
+ ```
 
-2. Run in that projects folder
-  * cd ~/src/my_lovely_project
-  * ./constant-testing.sh
+2. Run the script in that projects folder
+  ```shell
+  cd ~/src/my_lovely_project
+  ./constant-testing.sh
+  ```
 
 3. Start writing code!
