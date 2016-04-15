@@ -21,7 +21,9 @@ function log_info {
 }
 
 function log_debug {
-  echo -e "\e[33m$1\e[39m"
+  if [[ $debug ]]; then
+    echo -e "\e[33m$1\e[39m"
+  fi
 }
 
 function log_failure {
@@ -48,6 +50,7 @@ function file_changed {
 }
 
 log_info "I'm going to watch you work... in a creepy way"
+if [[ $1 == "--debug" ]]; then debug=1; fi 
 
 inotifywait -m -r -q --exclude '(.swp)' -e close_write,create,moved_to ./ |
 while read path action file; do
