@@ -7,7 +7,7 @@
  ./setup_in.sh ~/src/my_lovely_project
  ```
 
-2. Run in that projects folder
+2. Run the script in that projects folder
   ```shell
   cd ~/src/my_lovely_project
   ./constant-testing.sh
