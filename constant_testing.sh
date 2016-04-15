@@ -7,9 +7,10 @@ function run_all {
 
 function mix_test {
   log_info "Running: mix test $1"
-  result=`mix test $1` 
-  echo "$result"
-  if [[ $? != 0 ]]; then
+  output=`mix test $1` 
+  result=$?
+  echo "$output"
+  if [[ $result != 0 ]]; then
     log_failure "OOOPPPPSIE - Somewhat predictably, you've broken something"
   else 
     log_success "Congratulations, you haven't broken anything... yet..."
