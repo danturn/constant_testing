@@ -53,7 +53,7 @@ function file_changed {
 function install_tools {
   if [ $(dpkg-query -W -f='${Status}' inotify-tools 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
-    sudo apt-get install inotify-tools
+    sudo apt-get install inotify-tools -y
   fi
 }
 
