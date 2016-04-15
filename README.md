@@ -3,8 +3,8 @@
 
 ### Usage
 1. Setup for your Elixir project:
-  * e.g ./setup_in ~/src/my_lovely_project
+  * ./setup_in ~/src/my_lovely_project
 
 2. Run in that folder
-  * e.g cd ~/src/my_lovely_project
+  * cd ~/src/my_lovely_project
   * ./constant-testing.sh
