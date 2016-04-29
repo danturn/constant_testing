@@ -1,11 +1,11 @@
 #!/bin/bash
 
-function run_all {
+run_all() {
   log_info "$path$file changed... running all the tests from: `pwd`"
   mix_test
 }
 
-function mix_test {
+mix_test() {
   log_info "Running: mix test $1"
   output=`mix test $1` 
   result=$?
@@ -17,30 +17,30 @@ function mix_test {
   fi
 }
 
-function log_info {
+log_info() {
   echo -e "\e[35m$1\e[39m"
 }
 
-function log_debug {
+log_debug() {
   if [[ $debug ]]; then
     echo -e "\e[33m$1\e[39m"
   fi
 }
 
-function log_failure {
+log_failure() {
   echo -e "\e[31m$1\e[39m"
 }
 
-function log_success {
+log_success() {
   echo -e "\e[32m$1\e[39m"
 }
 
-function test_file_changed {
+test_file_changed() {
   log_debug "You changed the test file: $path$file so I'm running those tests for you"
   mix_test "$test_path" 
 }
 
-function file_changed {
+file_changed() {
   if [ -f $test_path ]; then 
     log_debug "You changed the file: $path$file so I'll run the tests for that"
     mix_test "$test_path"
@@ -57,7 +57,7 @@ mix_path() {
   test_path=${test_path/%.ex/_test.exs}
 }
 
-function install_tools {
+install_tools() {
   if [ $(dpkg-query -W -f='${Status}' inotify-tools 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
     sudo apt-get install inotify-tools
