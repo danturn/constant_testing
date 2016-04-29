@@ -49,6 +49,11 @@ function file_changed {
     log_failure "Uh-oh, You don't have tests for this do you?"
   fi
 }
+
+mix_path() {
+  [[ $1 =~ (^.*/)(test|lib)/ ]]
+  mix_path=${BASH_REMATCH[1]}
+}
  
 function install_tools {
   if [ $(dpkg-query -W -f='${Status}' inotify-tools 2>/dev/null | grep -c "ok installed") -eq 0 ];
@@ -57,17 +62,23 @@ function install_tools {
   fi
 }
 
-install_tools
-log_info "I'm going to watch you work... in a creepy way"
-if [[ $1 == "--debug" ]]; then debug=1; fi 
+watch() {
+  install_tools
+  log_info "I'm going to watch you work... in a creepy way"
+  [[ $1 == "--debug" ]] && debug=1 
 
-inotifywait -m -r -q --exclude '(.swp)' -e close_write ./ |  
-  while read path action file; do 
-    if [[ "$file" == *.exs || "$file" == *.ex ]]; then 
-      cd $path../
-      if [[ "$file" == *_test.exs ]]; then test_file_changed
-      elif [[ "$file" == *.ex ]]; then file_changed; fi
-      log_info "I'm watching you..."
-      cd - > /dev/null
-    fi
-  done
+  inotifywait -m -r -q --exclude '(.swp)' -e close_write ./ |  
+    while read path action file; do 
+      if [[ "$file" == *.exs || "$file" == *.ex ]]; then 
+        cd $path../
+        if [[ "$file" == *_test.exs ]]; then test_file_changed
+        elif [[ "$file" == *.ex ]]; then file_changed; fi
+        log_info "I'm watching you..."
+        cd - > /dev/null
+      fi
+    done
+}
+
+if [ "$1" != "test" ]; then
+  watch
+fi
