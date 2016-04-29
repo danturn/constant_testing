@@ -37,24 +37,26 @@ function log_success {
 
 function test_file_changed {
   log_debug "You changed the test file: $path$file so I'm running those tests for you"
-  mix_test "test/$file" 
+  mix_test "$test_path" 
 }
 
 function file_changed {
-  test_file="./test/${file%.*}_test.exs"
-  if [ -f $test_file ]; then 
+  if [ -f $test_path ]; then 
     log_debug "You changed the file: $path$file so I'll run the tests for that"
-    mix_test "$test_file"
+    mix_test "$test_path"
   else 
     log_failure "Uh-oh, You don't have tests for this do you?"
   fi
 }
 
 mix_path() {
-  [[ $1 =~ (^.*/)(test|lib)/ ]]
+  [[ $1 =~ (^.*/)((test|lib)/.*$) ]]
   mix_path=${BASH_REMATCH[1]}
+  file_path=${BASH_REMATCH[2]}
+  test_path=${file_path/#lib/test}
+  test_path=${test_path/%.ex/_test.exs}
 }
- 
+
 function install_tools {
   if [ $(dpkg-query -W -f='${Status}' inotify-tools 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
@@ -70,7 +72,8 @@ watch() {
   inotifywait -m -r -q --exclude '(.swp)' -e close_write ./ |  
     while read path action file; do 
       if [[ "$file" == *.exs || "$file" == *.ex ]]; then 
-        cd $path../
+        mix_path "$path$file"
+        cd $mix_path
         if [[ "$file" == *_test.exs ]]; then test_file_changed
         elif [[ "$file" == *.ex ]]; then file_changed; fi
         log_info "I'm watching you..."
