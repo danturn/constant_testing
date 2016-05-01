@@ -36,8 +36,12 @@ log_success() {
 }
 
 test_file_changed() {
-  log_debug "You changed the test file: $path$file so I'm running those tests for you"
-  mix_test "$test_path" 
+  if [ "$mix_path" == "" ]; then 
+    log_failure "Cannot find a mix project for: $path$file"
+  else
+    log_debug "You changed the test file: $path$file so I'm running those tests for you"
+    mix_test "$test_path" 
+  fi
 }
 
 file_changed() {
