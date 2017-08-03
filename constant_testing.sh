@@ -7,7 +7,7 @@ run_all() {
 
 mix_test() {
   log_info "Running: mix test $1"
-  output=`mix test $1` 
+  output=`unbuffer mix test $1` 
   result=$?
   echo "$output"
   if [[ $result != 0 ]]; then
@@ -65,6 +65,10 @@ install_tools() {
   if [ $(dpkg-query -W -f='${Status}' inotify-tools 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
     sudo apt-get install inotify-tools -y
+  fi
+  if [ $(dpkg-query -W -f='${Status}' expect 2>/dev/null | grep -c "ok installed") -eq 0 ];
+  then
+    sudo apt-get install expect -y
   fi
 }
 
