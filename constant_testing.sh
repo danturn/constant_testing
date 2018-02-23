@@ -1,13 +1,8 @@
 #!/bin/bash
 
-run_all() {
-  log_info "$path$file changed... running all the tests from: `pwd`"
-  mix_test
-}
-
 mix_test() {
   log_info "Running: mix test $1"
-  output=`mix test $1` 
+  output=`mix test $1 --color` 
   result=$?
   echo "$output"
   if [[ $result != 0 ]]; then
