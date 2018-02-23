@@ -32,4 +32,4 @@ test_test_path() {
   assert_test_path lib/project/lib/subfolder/lib.ex test/subfolder/lib_test.exs
 }
 
-. shunit2/source/2.1/src/shunit2
+. shunit2/shunit2
