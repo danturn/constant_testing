@@ -63,8 +63,13 @@ install_tools() {
   fi
 }
 
+clear_screen() {
+  tput reset
+}
+
 watch() {
   install_tools
+  clear_screen
   log_info "I'm going to watch you work... in a creepy way"
   [[ $1 == "--debug" ]] && debug=1 
 
@@ -73,6 +78,7 @@ watch() {
       if [[ "$file" == *.exs || "$file" == *.ex ]]; then 
         mix_path "$path$file"
         cd $mix_path
+        clear_screen
         if [[ "$file" == *_test.exs ]]; then test_file_changed
         elif [[ "$file" == *.ex ]]; then file_changed; fi
         log_info "I'm watching you..."
