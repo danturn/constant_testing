@@ -80,7 +80,12 @@ clear_screen() {
 watch() {
   install_tools
   clear_screen
-  log_info "I'm going to watch you work... in a creepy way"
+  if [ $FIXED_FILE ]; then
+    log_info "I'll run this for you so you can see how broken it is before you start work"
+    mix_test "$test_path"
+  else 
+    log_info "I'm going to watch you work... in a creepy way"
+  fi
 
   inotifywait -m -r -q --exclude '(.swp)' -e close_write ./ |  
   while read path action file; do 
