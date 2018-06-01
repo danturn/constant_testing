@@ -81,7 +81,7 @@ watch() {
   install_tools
   clear_screen
   if [ $FIXED_FILE ]; then
-    log_info "I'll run this for you so you can see how broken it is before you start work"
+    log_info "I'll run this for you now so you can see how broken it is before you start hacking about"
     mix_test "$test_path"
   else 
     log_info "I'm going to watch you work... in a creepy way"
