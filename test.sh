@@ -1,8 +1,8 @@
-if [ ! -d "shunit2" ]; then 
-  git clone https://github.com/kward/shunit2.git 
+if [ ! -d "shunit2" ]; then
+  git clone https://github.com/kward/shunit2.git
 fi
 
-. constant_testing.sh test
+. constant_testing --test
 
 assert_mix_path() {
   mix_path $1
