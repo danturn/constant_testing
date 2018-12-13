@@ -10,16 +10,15 @@ Run this in your elixir project (or at the root of your umbrella project) and wh
   git clone https://github.com/danturn/constant_testing.git
   ```
   
-2. Set it up for your Elixir project:
+2. Set it up wherever you want it
   ```shell
   cd constant_testing
-  ./setup_in.sh ~/src/my_lovely_project
+  ./setup_in.sh ~/bin
   ```
 
-3. Run constant testing in your Elixir project
+3. Run constant testing
   ```shell
-  cd ~/src/my_lovely_project
-  ./constant-testing.sh
+    constant-testing.sh
   ```
 
 4. Start writing code!
