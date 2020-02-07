@@ -57,9 +57,13 @@ find_elm_json() {
   echo $(dirname $json_dir)
 }
 
+real_readlink() {
+  python -c "import os,sys;print os.path.realpath(\"$1\")"
+}
+
 find_file_in_parent() {
   currentDir=$(dirname "$1")
-  current="$(readlink -f $currentDir)"
+  current="$(real_readlink $currentDir)"
   target="$2"
   while [[ $current != / ]]; do
     found=$(find "$current" -maxdepth 1 -mindepth 1 -name "$target")
@@ -68,7 +72,7 @@ find_file_in_parent() {
         echo $current"/"$target
         return 0
     fi
-    current="$(readlink -f "$current"/..)"
+    current="$(real_readlink "$current"/..)"
   done
   return 1
 }
