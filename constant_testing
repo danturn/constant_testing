@@ -39,6 +39,41 @@ test_file_changed() {
   fi
 }
 
+elm_make() {
+  log_info "Running 'elm make $1'"
+  make_dir=$(find_elm_json $1)
+  pushd $make_dir > /dev/null
+  elm make $1
+  popd > /dev/null
+}
+
+find_main() {
+  find_file_in_parent $1 "Main.elm"
+}
+
+find_elm_json() {
+  main_dir=$(dirname $1)
+  json_dir=$(find_file_in_parent $main_dir "elm.json")
+  echo $(dirname $json_dir)
+}
+
+find_file_in_parent() {
+  currentDir=$(dirname "$1")
+  current="$(readlink -f $currentDir)"
+  target="$2"
+  while [[ $current != / ]]; do
+    found=$(find "$current" -maxdepth 1 -mindepth 1 -name "$target")
+
+    if [ -n "$found" ]; then
+        echo $current"/"$target
+        return 0
+    fi
+    current="$(readlink -f "$current"/..)"
+  done
+  return 1
+}
+
+
 file_changed() {
   if [ -f $test_path ]; then
     log_debug "You changed the file: $path$file so I'll run the tests for that"
@@ -66,19 +101,12 @@ mix_path() {
   test_path=${test_path/%.ex/_test.exs}
 }
 
-install_tools() {
-  if [ $(dpkg-query -W -f='${Status}' inotify-tools 2>/dev/null | grep -c "ok installed") -eq 0 ];
-  then
-    sudo apt-get install inotify-tools -y
-  fi
-}
 
 clear_screen() {
   tput reset
 }
 
 watch() {
-  install_tools
   clear_screen
   if [ $FIXED_FILE ]; then
     log_info "I'll run this for you now so you can see how broken it is before you start hacking about"
@@ -87,49 +115,61 @@ watch() {
     log_info "I'm going to watch you work... in a creepy way"
   fi
 
-  inotifywait -m -r -q --exclude '(.swp)' -e close_write ./ |
-  while read path action file; do
-    if [[ "$file" == *.exs || "$file" == *.ex ]]; then
-      if [ $FIXED_FILE ]; then
+  fswatch --recursive -m "poll_monitor" -e ".swp" -e ".swo" . |
+    while read path event ; do
+      if [[ "$path" == *.exs || "$path" == *.ex ]]; then
+        if [ $FIXED_FILE ]; then
+          clear_screen
+          any_file_changed
+        else
+          mix_path "$path"
+          cd $mix_path
+          clear_screen
+          if [[ "$path" == *_test.exs ]]; then test_file_changed
+          elif [[ "$path" == *.ex ]]; then file_changed; fi
+          log_info "I'm watching you..."
+          cd - > /dev/null
+        fi
+      elif [[ $path == *.elm ]]; then
         clear_screen
-        any_file_changed
-      else
-        mix_path "$path$file"
-        cd $mix_path
-        clear_screen
-        if [[ "$file" == *_test.exs ]]; then test_file_changed
-        elif [[ "$file" == *.ex ]]; then file_changed; fi
-        log_info "I'm watching you..."
-        cd - > /dev/null
+        if [ $FIXED_FILE ]; then
+          elm_make $test_path
+        else
+          echo "LOOKING FOR MAIN"
+          main=$(find_main $path)
+          if [ $? -eq 0 ]; then
+            elm_make $main
+          else
+            log_info "No Main.elm found for $path"
+          fi
+        fi
       fi
-    fi
+      done
+    }
+
+
+  POSITIONAL=()
+  while [[ $# -gt 0 ]]
+  do
+    key="$1"
+
+    case $key in
+      -d|--debug)
+        DEBUG=true
+        shift
+        ;;
+      -t|--test)
+        TEST=true
+        shift
+        ;;
+      *)    # any option
+        FIXED_FILE=true
+        test_path=("$1")
+        shift
+        ;;
+    esac
   done
-}
 
-
-POSITIONAL=()
-while [[ $# -gt 0 ]]
-do
-  key="$1"
-
-  case $key in
-    -d|--debug)
-      echo "ASDJKDSAJKASD£"
-      DEBUG=true
-      shift
-      ;;
-    -t|--test)
-      TEST=true
-      shift
-      ;;
-    *)    # any option
-      FIXED_FILE=true
-      test_path=("$1")
-      shift
-      ;;
-  esac
-done
-
-if ! [[ $TEST ]]; then
-  watch
-fi
+  if ! [[ $TEST ]]; then
+    watch
+  fi
