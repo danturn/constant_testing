@@ -135,7 +135,6 @@ watch() {
         if [ $FIXED_FILE ]; then
           elm_make $test_path
         else
-          echo "LOOKING FOR MAIN"
           main=$(find_main $path)
           if [ $? -eq 0 ]; then
             elm_make $main
