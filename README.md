@@ -1,5 +1,5 @@
 # Constant Testing
-## Monitors elixir projects and automatically runs tests when files are edited.
+## Monitors Elixir and Elm projects and when it detects a file update it will run the tests for that file if it's an Elixir file or compile the app if its an Elm file
 
 Run this in your elixir project (or at the root of your umbrella project) and when you update a .exs file it will run the tests from that file. If you update a .ex file it will look for a corresponding .exs file and run those tests
 
