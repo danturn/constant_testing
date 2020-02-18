@@ -113,8 +113,15 @@ clear_screen() {
 watch() {
   clear_screen
   if [ $FIXED_FILE ]; then
-    log_info "I'll run this for you now so you can see how broken it is before you start hacking about"
-    mix_test "$test_path"
+    if [[ "$test_path" = *.exs ]]; then
+      log_info "I'll run this for you now so you can see how broken it is before you start hacking about"
+      mix_test "$test_path"
+    elif [[ "$test_path" = *Main.elm ]]; then
+      log_info "I'll run this for you now so you can see how broken it is before you start hacking about"
+      elm_make $test_path
+    else
+      log_failure "I need an exs or Main.elm file to work mate..."
+    fi
   else
     log_info "I'm going to watch you work... in a creepy way"
   fi
