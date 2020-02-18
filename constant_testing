@@ -110,9 +110,25 @@ clear_screen() {
   tput reset
 }
 
+elm_analyse() {
+  log_info "Let's see how non compliant your elm is mate..."
+  elm_analyse_cmd="yarn --cwd assets run elm-analyse"
+  log_info "Running: $elm_analyse_cmd"
+  output=`$elm_analyse_cmd`
+  result=$?
+  echo "$output"
+  if [[ $result != 0 ]]; then
+    log_failure "Your elm is totally non compliant. What is this amateur hour?"
+  else
+    log_success "Much like a million monkeys at a typewriter will eventually write Shakespeare, your elm has lucked its way to being compliant. You're the best..."
+  fi
+}
+
 watch() {
   clear_screen
-  if [ $FIXED_FILE ]; then
+  if [ $ELM_ANALYSE ]; then
+    elm_analyse
+  elif [ $FIXED_FILE ]; then
     if [[ "$test_path" = *.exs ]]; then
       log_info "I'll run this for you now so you can see how broken it is before you start hacking about"
       mix_test "$test_path"
@@ -120,7 +136,7 @@ watch() {
       log_info "I'll run this for you now so you can see how broken it is before you start hacking about"
       elm_make $test_path
     else
-      log_failure "I need an exs or Main.elm file to work mate..."
+      log_failure "I don't understand the arguement you gave me. Try again buddy..."
     fi
   else
     log_info "I'm going to watch you work... in a creepy way"
@@ -141,6 +157,8 @@ watch() {
           log_info "I'm watching you..."
           cd - > /dev/null
         fi
+      elif [[ $path == *.elm && $ELM_ANALYSE ]]; then
+        elm_analyse
       elif [[ $path == *.elm ]]; then
         clear_screen
         if [ $FIXED_FILE ]; then
@@ -163,9 +181,14 @@ watch() {
   do
     key="$1"
 
+
     case $key in
       -d|--debug)
         DEBUG=true
+        shift
+        ;;
+      -ea|--elm-analyse)
+        ELM_ANALYSE=true
         shift
         ;;
       -t|--test)
