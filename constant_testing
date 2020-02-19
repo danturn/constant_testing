@@ -126,7 +126,7 @@ elm_analyse() {
 
 elm_test() {
   log_info "Let's run the elm tests..."
-  elm_test_cmd="yarn --cwd assets run elm-test"
+  elm_test_cmd="yarn --cwd assets run elm-test-all"
   log_info "Running: $elm_test_cmd"
   output=`$elm_test_cmd`
   result=$?
