@@ -126,7 +126,7 @@ elm_analyse() {
 
 elm_test() {
   log_info "Let's run the elm tests..."
-  elm_test_cmd="yarn --cwd assets run elm-test-all"
+  elm_test_cmd="yarn --cwd assets run elm-test"
   log_info "Running: $elm_test_cmd"
   output=`$elm_test_cmd`
   result=$?
@@ -145,7 +145,7 @@ watch() {
   elif [ $ELM_TEST ]; then
     elm_test
   elif [ $FIXED_FILE ]; then
-    if [[ "$test_path" = *.exs ]]; then
+    if [[ "$test_path" = *.exs* ]]; then
       log_info "I'll run this for you now so you can see how broken it is before you start hacking about"
       mix_test "$test_path"
     elif [[ "$test_path" = *Main.elm ]]; then
