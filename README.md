@@ -41,6 +41,6 @@ regardless of what `.ex` or `.exs` files are saved, will run
 regardless of what `.elm` file is saved, will run
 `elm make /path/to/a/specific/Main.elm`
 
-4. `constant_testing --elm-analyse`
+4. `constant_testing --elm-test`
 regardless of what `.elm` file is saved, will run
-`yarn --cwd assets run elm-analyse`
+`yarn --cwd assets run elm-test`
