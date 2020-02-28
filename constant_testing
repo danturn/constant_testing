@@ -1,15 +1,7 @@
 #!/bin/bash
 
 mix_test() {
-  log_info "Running: mix test $1"
-  output=`mix test $1 --color`
-  result=$?
-  echo "$output"
-  if [[ $result != 0 ]]; then
-    log_failure "OOOPPPPSIE - Somewhat predictably, you've broken something"
-  else
-    log_success "Congratulations, you haven't broken anything... yet..."
-  fi
+  run_command "mix test $1 --color" "Congratulations, you haven't broken anything... yet..." "OOOPPPPSIE - Somewhat predictably, you've broken something"
 }
 
 log_info() {
@@ -112,30 +104,35 @@ clear_screen() {
 
 elm_analyse() {
   log_info "Let's see how non compliant your elm is mate..."
-  elm_analyse_cmd="yarn --cwd assets run elm-analyse"
-  log_info "Running: $elm_analyse_cmd"
-  output=`$elm_analyse_cmd`
-  result=$?
-  echo "$output"
-  if [[ $result != 0 ]]; then
-    log_failure "Your elm is totally non compliant. What is this amateur hour?"
-  else
-    log_success "Much like a million monkeys at a typewriter will eventually write Shakespeare, your elm has lucked its way to being compliant. You're the best..."
-  fi
+  run_command "yarn --cwd assets run elm-analyse" "Much like a million monkeys at a typewriter will eventually write Shakespeare, your elm has lucked its way to being compliant. You're the best..." "Your elm is totally non compliant. What is this amateur hour?" true
 }
 
 elm_test() {
-  log_info "Let's run the elm tests..."
-  elm_test_cmd="yarn --cwd assets run elm-test"
-  log_info "Running: $elm_test_cmd"
-  output=`$elm_test_cmd`
+  run_command "yarn --cwd assets run elm-test" "Your elm tests passed! First time for everything..." "Your elm is riddled with bugs... (at least you have tests(s) though)..." true
+}
+
+run_command() {
+  cmd="$1"
+  success_message="$2"
+  failure_message="$3"
+  echo_output=$4
+  log_info "Running: $cmd"
+  output=`$cmd`
   result=$?
-  echo "$output"
-  if [[ $result != 0 ]]; then
-    log_failure "Your elm is riddled with bugs... (at least you have tests(s) though)..."
-  else
-    log_success "Your elm tests passed! First time for everything..."
+  last_run_cmd=$cmd
+  if [[ $echo_output = true ]]; then
+    echo "$output"
   fi
+  if [[ $result != 0 ]]; then
+    log_failure "$failure_message"
+  else
+    log_success "$success_message"
+  fi
+}
+
+run_last_cmd() {
+  log_info "I don't know what to do with the file you just saved, so I'll just run the last thing I did again..."
+  run_command "$last_run_cmd" "Looks like everything is ok?" "It totally wrecked..."
 }
 
 watch() {
@@ -191,6 +188,10 @@ watch() {
             log_info "No Main.elm found for $path"
           fi
         fi
+      elif [[ $path != */.mix/* && $path != *"elm-stuff"* && ! -d $path ]]; then
+        echo $path
+        clear_screen
+        run_last_cmd
       fi
       done
     }
@@ -199,8 +200,8 @@ watch() {
   POSITIONAL=()
   while [[ $# -gt 0 ]]
   do
+    last_run_cmd=":"
     key="$1"
-
 
     case $key in
       -d|--debug)
