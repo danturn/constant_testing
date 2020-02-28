@@ -49,6 +49,10 @@ find_elm_json() {
   echo $(dirname $json_dir)
 }
 
+find_first_elm_json() {
+  echo `find -name elm.json -print -quit`
+}
+
 real_readlink() {
   python -c "import os,sys;print os.path.realpath(\"$1\")"
 }
@@ -102,8 +106,16 @@ clear_screen() {
   tput reset
 }
 
+elm_test_command() {
+  echo "elm-test"
+}
+
 elm_test() {
-  run_command "yarn --cwd assets run elm-test" "Your elm tests passed! First time for everything..." "Your elm is riddled with bugs... (at least you have tests(s) though)..." true
+  elm_json_path=$(find_first_elm_json)
+  elm_json_dir=$(dirname $elm_json_path)
+  pushd $elm_json_dir > /dev/null
+  run_command $(elm_test_command) "Your elm tests passed! First time for everything..." "Your elm is riddled with bugs... (at least you have tests(s) though)..." true
+  popd > /dev/null
 }
 
 run_command() {
@@ -126,8 +138,13 @@ run_command() {
 }
 
 run_last_cmd() {
-  log_info "I don't know what to do with the file you just saved, so I'll just run the last thing I did again..."
-  run_command "$last_run_cmd" "Looks like everything is ok?" "It totally wrecked..." true
+  if [[ $last_run_cmd = $(elm_test_command) ]]; then
+    log_info "I don't know what to do with the file you just saved, so I'll just run the last thing I did again..."
+    elm_test
+  else
+    log_info "I don't know what to do with the file you just saved, so I'll just run the last thing I did again..."
+    run_command "$last_run_cmd" "Looks like everything is ok?" "It totally wrecked..." true
+  fi
 }
 
 watch() {
