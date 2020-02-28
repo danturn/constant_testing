@@ -102,11 +102,6 @@ clear_screen() {
   tput reset
 }
 
-elm_analyse() {
-  log_info "Let's see how non compliant your elm is mate..."
-  run_command "yarn --cwd assets run elm-analyse" "Much like a million monkeys at a typewriter will eventually write Shakespeare, your elm has lucked its way to being compliant. You're the best..." "Your elm is totally non compliant. What is this amateur hour?" true
-}
-
 elm_test() {
   run_command "yarn --cwd assets run elm-test" "Your elm tests passed! First time for everything..." "Your elm is riddled with bugs... (at least you have tests(s) though)..." true
 }
@@ -137,9 +132,7 @@ run_last_cmd() {
 
 watch() {
   clear_screen
-  if [ $ELM_ANALYSE ]; then
-    elm_analyse
-  elif [ $ELM_TEST ]; then
+  if [ $ELM_TEST ]; then
     elm_test
   elif [ $FIXED_FILE ]; then
     if [[ "$test_path" = *.exs* ]]; then
@@ -170,9 +163,6 @@ watch() {
           log_info "I'm watching you..."
           cd - > /dev/null
         fi
-      elif [[ $path == *.elm && $ELM_ANALYSE && $path != *"elm-stuff"* ]]; then
-        clear_screen
-        elm_analyse
       elif [[ $path == *.elm && $ELM_TEST && $path != *"elm-stuff"* ]]; then
         clear_screen
         elm_test
@@ -189,7 +179,6 @@ watch() {
           fi
         fi
       elif [[ $path != */.mix/* && $path != *"elm-stuff"* && ! -d $path ]]; then
-        echo $path
         clear_screen
         run_last_cmd
       fi
@@ -206,10 +195,6 @@ watch() {
     case $key in
       -d|--debug)
         DEBUG=true
-        shift
-        ;;
-      -ea|--elm-analyse)
-        ELM_ANALYSE=true
         shift
         ;;
       -et|--elm-test)
