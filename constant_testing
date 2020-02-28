@@ -127,7 +127,7 @@ run_command() {
 
 run_last_cmd() {
   log_info "I don't know what to do with the file you just saved, so I'll just run the last thing I did again..."
-  run_command "$last_run_cmd" "Looks like everything is ok?" "It totally wrecked..."
+  run_command "$last_run_cmd" "Looks like everything is ok?" "It totally wrecked..." true
 }
 
 watch() {
