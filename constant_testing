@@ -138,6 +138,8 @@ run_command() {
 }
 
 run_last_cmd() {
+  echo "$last_run_cmd"
+  echo "$no_cmd"
   if [[ $last_run_cmd = $(elm_test_command) ]]; then
     log_info "I don't know what to do with the file you just saved, so I'll just run the last thing I did again..."
     elm_test
@@ -147,8 +149,9 @@ run_last_cmd() {
   fi
 }
 
-watch() {
+watch_linux() {
   clear_screen
+  echo "watch linux"
   if [ $ELM_TEST ]; then
     elm_test
   elif [ $FIXED_FILE ]; then
@@ -206,6 +209,7 @@ watch() {
   POSITIONAL=()
   while [[ $# -gt 0 ]]
   do
+    no_cmd=":"
     last_run_cmd=":"
     key="$1"
 
@@ -230,6 +234,32 @@ watch() {
     esac
   done
 
+
   if ! [[ $TEST ]]; then
-    watch
+    #echo $OSTYPE
+    case $OSTYPE in
+      "linux-gnu"*)
+        watch_linux
+        ;;
+      "darwin"*)
+        echo "Mac not supported just yet"
+        exit 1
+        ;;
+    esac
   fi
+
+#  if [[ "$OSTYPE" == "linux-gnu" ]]; then
+#        # ...
+#elif [[ "$OSTYPE" == "darwin"* ]]; then
+#        # Mac OSX
+#elif [[ "$OSTYPE" == "cygwin" ]]; then
+#        # POSIX compatibility layer and Linux environment emulation for Windows
+#elif [[ "$OSTYPE" == "msys" ]]; then
+#        # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+#elif [[ "$OSTYPE" == "win32" ]]; then
+#        # I'm not sure this can happen.
+#elif [[ "$OSTYPE" == "freebsd"* ]]; then
+#        # ...
+#else
+#        # Unknown.
+#fi
