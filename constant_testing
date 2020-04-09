@@ -58,7 +58,7 @@ find_elm_json() {
 }
 
 real_readlink() {
-  python -c "import os,sys;print os.path.realpath(\"$1\")"
+  python3 -c "import os,sys;print(os.path.realpath(\"$1\"))"
 }
 
 find_file_in_parent() {
