@@ -43,4 +43,4 @@ regardless of what `.elm` file is saved, will run
 
 4. `constant_testing --elm-test`
 regardless of what `.elm` file is saved, will run
-`yarn --cwd assets run elm-test`
+`elm-test`
