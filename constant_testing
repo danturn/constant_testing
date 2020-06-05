@@ -33,16 +33,15 @@ test_file_changed() {
 
 elm_make() {
   #TODO figure out why rerunning with rerun_last_command has messed up output
+  echo "I'm about to run elm make!"
   run_command "elm_make_from_correct_dir $1" "Congrats, elm actually compiles... for now" "Turns out your elm is totally broken... what a suprise.... to nobody" true "elm make $1"
 }
 
 elm_make_from_correct_dir() {
   make_dir=$(find_elm_json $1)
   pushd $make_dir > /dev/null
-  outout=`elm make $1 2>&1`
   elm make $1
   popd > /dev/null
-  echo $output
 }
 
 elm_test_command() {
@@ -121,10 +120,12 @@ mix_path() {
 
 
 clear_screen() {
-  tput reset
+  #tput reset
+  echo "screen cleared! (not really)"
 }
 
 run_command() {
+  echo "*** About to run a command ***"
   cmd="$1"
   success_message="$2"
   failure_message="$3"
@@ -135,12 +136,13 @@ run_command() {
   else
     log_info "Running: $log_cmd"
   fi
+  echo "the command will be ($cmd)"
   output=`$cmd`
   result=$?
   last_run_cmd=$cmd
-  if [[ $echo_output = true ]]; then
-    echo "$output"
-  fi
+  #if [[ $echo_output = true ]]; then
+    echo "hello mother: $output"
+  #fi
   if [[ $result != 0 ]]; then
     log_failure "$failure_message"
   else
@@ -201,6 +203,7 @@ watch() {
         else
           main=$(find_main $path)
           if [ $? -eq 0 ]; then
+            echo "clear the screen. its elm time motherflipper"
             elm_make $main
           else
             log_info "No Main.elm found for $path"
