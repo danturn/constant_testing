@@ -31,8 +31,6 @@ test_file_changed() {
   fi
 }
 
-  #TODO if the saved path is in test/ then run elm test instead! great idea
-  #TODO write tests for constant testing you oaf!
 elm_make() {
   run_command "elm_make_from_correct_dir $1" "Congrats, elm actually compiles... for now" "Turns out your elm is totally broken... what a surprise.... to nobody" true "elm make $1"
 }
