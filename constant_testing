@@ -38,10 +38,58 @@ elm_make() {
 elm_make_from_correct_dir() {
   make_dir=$(find_elm_json $1)
   pushd $make_dir > /dev/null
-  elm make $1
+  path=$(find_fixed_elm_main_path $1)
+  elm make "$path"
   result=$?
   popd > /dev/null
   return $result
+}
+
+find_fixed_elm_main_path() {
+  current_dir="$(pwd)"
+  main_file_path=$1
+
+  str="Learn to Split a String in Bash Scripting"
+
+  IFS='/'
+  current_dir_heirarchy=()
+  read -ra ADDR <<< "$current_dir"
+  for i in "${ADDR[@]}"; do
+    current_dir_heirarchy+=("$i")
+  done
+
+  main_file_dir_heirarchy=()
+  read -ra ADDR <<< "$main_file_path"
+  for i in "${ADDR[@]}"; do
+      main_file_dir_heirarchy+=("$i")
+  done
+
+  looking_index=0
+
+  for i in "${current_dir_heirarchy[@]}"; do
+    if [[ "$i" = "${main_file_dir_heirarchy[$looking_index]}" ]]; then
+      looking_index=$(($looking_index + 1))
+      first_dir_after="$i"
+    elif (( $looking_index > 0 )); then
+      break;
+    fi
+  done
+
+  path=""
+  start_appending=false
+  for i in "${main_file_dir_heirarchy[@]}"; do
+    if [[ $start_appending = false ]]; then
+      if [[ $i = $first_dir_after ]]; then
+        start_appending=true
+      fi
+    else
+      path="${path}$i/"
+    fi
+  done
+
+  path="${path%?}"
+
+  echo "$path"
 }
 
 elm_test_command() {
