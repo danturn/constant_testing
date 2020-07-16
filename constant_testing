@@ -38,14 +38,14 @@ elm_make() {
 elm_make_from_correct_dir() {
   make_dir=$(find_elm_json $1)
   pushd $make_dir > /dev/null
-  path=$(find_fixed_elm_main_path $1)
+  path=$(find_elm_main_path_relative_to_elm_json $1)
   elm make "$path"
   result=$?
   popd > /dev/null
   return $result
 }
 
-find_fixed_elm_main_path() {
+find_elm_main_path_relative_to_elm_json() {
   current_dir="$(pwd)"
   main_file_path=$1
 
