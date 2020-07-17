@@ -32,17 +32,62 @@ test_file_changed() {
 }
 
 elm_make() {
-  #TODO figure out why rerunning with rerun_last_command has messed up output
-  run_command "elm_make_from_correct_dir $1" "Congrats, elm actually compiles... for now" "Turns out your elm is totally broken... what a suprise.... to nobody" true "elm make $1"
+  run_command "elm_make_from_correct_dir $1" "Congrats, elm actually compiles... for now" "Turns out your elm is totally broken... what a surprise.... to nobody" true "elm make $1"
 }
 
 elm_make_from_correct_dir() {
   make_dir=$(find_elm_json $1)
   pushd $make_dir > /dev/null
-  outout=`elm make $1 2>&1`
-  elm make $1
+  path=$(find_elm_main_path_relative_to_elm_json $1)
+  elm make "$path"
+  result=$?
   popd > /dev/null
-  echo $output
+  return $result
+}
+
+find_elm_main_path_relative_to_elm_json() {
+  current_dir="$(pwd)"
+  main_file_path=$1
+
+  IFS='/'
+  current_dir_heirarchy=()
+  read -ra ADDR <<< "$current_dir"
+  for i in "${ADDR[@]}"; do
+    current_dir_heirarchy+=("$i")
+  done
+
+  main_file_dir_heirarchy=()
+  read -ra ADDR <<< "$main_file_path"
+  for i in "${ADDR[@]}"; do
+      main_file_dir_heirarchy+=("$i")
+  done
+
+  looking_index=0
+
+  for i in "${current_dir_heirarchy[@]}"; do
+    if [[ "$i" = "${main_file_dir_heirarchy[$looking_index]}" ]]; then
+      looking_index=$(($looking_index + 1))
+      first_dir_after="$i"
+    elif (( $looking_index > 0 )); then
+      break;
+    fi
+  done
+
+  path=""
+  start_appending=false
+  for i in "${main_file_dir_heirarchy[@]}"; do
+    if [[ $start_appending = false ]]; then
+      if [[ $i = $first_dir_after ]]; then
+        start_appending=true
+      fi
+    else
+      path="${path}$i/"
+    fi
+  done
+
+  path="${path%?}"
+
+  echo "$path"
 }
 
 elm_test_command() {
@@ -137,7 +182,6 @@ run_command() {
   fi
   output=`$cmd`
   result=$?
-  last_run_cmd=$cmd
   if [[ $echo_output = true ]]; then
     echo "$output"
   fi
@@ -145,16 +189,6 @@ run_command() {
     log_failure "$failure_message"
   else
     log_success "$success_message"
-  fi
-}
-
-run_last_cmd() {
-  if [[ $last_run_cmd = $(elm_test_command) ]]; then
-    log_info "I don't know what to do with the file you just saved, so I'll just run the last thing I did again..."
-    elm_test
-  else
-    log_info "I don't know what to do with the file you just saved, so I'll just run the last thing I did again..."
-    run_command "$last_run_cmd" "Looks like everything is ok?" "It totally wrecked..." true
   fi
 }
 
@@ -206,9 +240,6 @@ watch() {
             log_info "No Main.elm found for $path"
           fi
         fi
-      elif [[ $path != */.mix/* && $path != *"elm-stuff"* && ! -d $path && $path != *"elm/index.html" ]]; then
-        clear_screen
-        run_last_cmd
       fi
       done
     }
@@ -217,7 +248,6 @@ watch() {
   POSITIONAL=()
   while [[ $# -gt 0 ]]
   do
-    last_run_cmd=":"
     key="$1"
 
     case $key in
