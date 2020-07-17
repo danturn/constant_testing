@@ -49,8 +49,6 @@ find_elm_main_path_relative_to_elm_json() {
   current_dir="$(pwd)"
   main_file_path=$1
 
-  str="Learn to Split a String in Bash Scripting"
-
   IFS='/'
   current_dir_heirarchy=()
   read -ra ADDR <<< "$current_dir"
