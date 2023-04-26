@@ -4,22 +4,23 @@ mix_test() {
   run_command "mix test $1 --color" "Congratulations, you haven't broken anything... yet..." "OOOPPPPSIE - Somewhat predictably, you've broken something" true
 }
 
+
 log_info() {
-  echo -e "\e[35m$1\e[39m"
+  echo -e "$(tput setaf 5)$1$(tput init)"
 }
 
 log_debug() {
   if [[ $DEBUG ]]; then
-    echo -e "\e[33m$1\e[39m"
+    echo -e "$(tput setaf 3)$1$(tput init)"
   fi
 }
 
 log_failure() {
-  echo -e "\e[31m$1\e[39m"
+  echo -e "$(tput setaf 1)$1$(tput init)"
 }
 
 log_success() {
-  echo -e "\e[32m$1\e[39m"
+  echo -e "$(tput setaf 2)$1$(tput init)"
 }
 
 test_file_changed() {
@@ -31,45 +32,6 @@ test_file_changed() {
   fi
 }
 
-elm_make() {
-  #TODO figure out why rerunning with rerun_last_command has messed up output
-  run_command "elm_make_from_correct_dir $1" "Congrats, elm actually compiles... for now" "Turns out your elm is totally broken... what a suprise.... to nobody" true "elm make $1"
-}
-
-elm_make_from_correct_dir() {
-  make_dir=$(find_elm_json $1)
-  pushd $make_dir > /dev/null
-  outout=`elm make $1 2>&1`
-  elm make $1
-  popd > /dev/null
-  echo $output
-}
-
-elm_test_command() {
-  echo "elm-test"
-}
-
-elm_test() {
-  elm_json_path=$(find_first_elm_json)
-  elm_json_dir=$(dirname $elm_json_path)
-  pushd $elm_json_dir > /dev/null
-  run_command $(elm_test_command) "Your elm tests passed! First time for everything..." "Your elm is riddled with bugs... (at least you have tests(s) though)..." true
-  popd > /dev/null
-}
-
-find_main() {
-  find_file_in_parent $1 "Main.elm"
-}
-
-find_elm_json() {
-  main_dir=$(dirname $1)
-  json_dir=$(find_file_in_parent $main_dir "elm.json")
-  echo $(dirname $json_dir)
-}
-
-find_first_elm_json() {
-  echo `find -name elm.json ! -path */elm-stuff/* -print -quit`
-}
 
 real_readlink() {
   python3 -c "import os,sys;print(os.path.realpath(\"$1\"))"
@@ -83,8 +45,8 @@ find_file_in_parent() {
     found=$(find "$current" -maxdepth 1 -mindepth 1 -name "$target")
 
     if [ -n "$found" ]; then
-        echo $current"/"$target
-        return 0
+      echo $current"/"$target
+      return 0
     fi
     current="$(real_readlink "$current"/..)"
   done
@@ -149,26 +111,16 @@ run_command() {
 }
 
 run_last_cmd() {
-  if [[ $last_run_cmd = $(elm_test_command) ]]; then
-    log_info "I don't know what to do with the file you just saved, so I'll just run the last thing I did again..."
-    elm_test
-  else
-    log_info "I don't know what to do with the file you just saved, so I'll just run the last thing I did again..."
-    run_command "$last_run_cmd" "Looks like everything is ok?" "It totally wrecked..." true
-  fi
+  log_info "I don't know what to do with the file you just saved, so I'll just run the last thing I did again..."
+  run_command "$last_run_cmd" "Looks like everything is ok?" "It totally wrecked..." true
 }
 
 watch() {
   clear_screen
-  if [ $ELM_TEST ]; then
-    elm_test
-  elif [ $FIXED_FILE ]; then
+  if [ $FIXED_FILE ]; then
     if [[ "$test_path" = *.exs* ]]; then
       log_info "I'll run this for you now so you can see how broken it is before you start hacking about"
       mix_test "$test_path"
-    elif [[ "$test_path" = *Main.elm ]]; then
-      log_info "I'll run this for you now so you can see how broken it is before you start hacking about"
-      elm_make $test_path
     else
       log_failure "I don't understand the arguement you gave me. Try again buddy..."
     fi
@@ -176,7 +128,7 @@ watch() {
     log_info "I'm going to watch you work... in a creepy way"
   fi
 
-  fswatch --recursive -m "poll_monitor" -e ".swp" -e ".swo" . |
+  fswatch $PWD |
     while read path event ; do
       if [[ "$path" == *.exs || "$path" == *.ex ]]; then
         if [ $FIXED_FILE ]; then
@@ -191,56 +143,34 @@ watch() {
           log_info "I'm watching you..."
           cd - > /dev/null
         fi
-      elif [[ $path == *.elm && $ELM_TEST && $path != *"elm-stuff"* ]]; then
-        clear_screen
-        elm_test
-      elif [[ $path == *.elm && $path != *"elm-stuff"* ]]; then
-        clear_screen
-        if [ $FIXED_FILE ]; then
-          elm_make $test_path
-        else
-          main=$(find_main $path)
-          if [ $? -eq 0 ]; then
-            elm_make $main
-          else
-            log_info "No Main.elm found for $path"
-          fi
-        fi
-      elif [[ $path != */.mix/* && $path != *"elm-stuff"* && ! -d $path && $path != *"elm/index.html" ]]; then
-        clear_screen
-        run_last_cmd
       fi
-      done
-    }
+    done
+}
 
 
-  POSITIONAL=()
-  while [[ $# -gt 0 ]]
-  do
-    last_run_cmd=":"
-    key="$1"
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+  last_run_cmd=":"
+  key="$1"
 
-    case $key in
-      -d|--debug)
-        DEBUG=true
-        shift
-        ;;
-      -et|--elm-test)
-        ELM_TEST=true
-        shift
-        ;;
-      -t|--test)
-        TEST=true
-        shift
-        ;;
-      *)    # any option
-        FIXED_FILE=true
-        test_path=("$1")
-        shift
-        ;;
-    esac
-  done
+  case $key in
+    -d|--debug)
+      DEBUG=true
+      shift
+      ;;
+    -t|--test)
+      TEST=true
+      shift
+      ;;
+    *)    # any option
+      FIXED_FILE=true
+      test_path=("$1")
+      shift
+      ;;
+  esac
+done
 
-  if ! [[ $TEST ]]; then
-    watch
-  fi
+if ! [[ $TEST ]]; then
+  watch
+fi
