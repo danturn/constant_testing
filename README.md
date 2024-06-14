@@ -18,7 +18,7 @@ Run this in your elixir project (or at the root of your umbrella project) and wh
 
 3. Run constant testing
   ```shell
-    constant-testing
+    constant_testing
   ```
 
 4. Start writing code!
